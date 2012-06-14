@@ -8,10 +8,16 @@ type xer struct {
 	state []uint64
 }
 
+// Create a xer PRNG. Using the same seed for generators of different sizes
+// will produce different sequences starting possibly with the first value.
+// stateSize is the number of 64-bit words of state; larger values imply
+// longer periods. Recommended values are 256 or 65536 for best performance.
 func New(seed int64, stateSize int) rand.Source {
 	switch stateSize {
 	case 256:
 		return new256(seed)
+	case 65536:
+		return new65536(seed)
 	}
 	return newN(seed, stateSize)
 }

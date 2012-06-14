@@ -32,6 +32,15 @@ func BenchmarkXer312(b *testing.B) {
 	}
 }
 
+func BenchmarkXer65536(b *testing.B) {
+	b.StopTimer()
+	s := New(0, 65536)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		s.Int63()
+	}
+}
+
 func BenchmarkRandSrcSeed(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		rand.NewSource(0)
@@ -47,5 +56,11 @@ func BenchmarkXer256Seed(b *testing.B) {
 func BenchmarkXer312Seed(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		New(0, 312)
+	}
+}
+
+func BenchmarkXer65536Seed(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		New(0, 65536)
 	}
 }
