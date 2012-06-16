@@ -28,7 +28,7 @@ func newN(seed int64, stateSize int) rand.Source {
 	return x
 }
 
-func (x *xer) Seed(seed int64) {
+func doSeed(s uint64, state []uint64) (sum uint64) {
 	// MMIX LCG by Knuth retrieved from Wikipedia
 	// I chose an LCG to seed because its state size is 1 and it has period m
 	// (in this case 2⁶⁴) independent of its seed. 64-bit values are produced,
@@ -36,22 +36,27 @@ func (x *xer) Seed(seed int64) {
 	// through its period for state sizes less than 2⁶³ words.
 	const a uint64 = 6364136223846793005
 	const c uint64 = 1442695040888963407
-	s := uint64(seed)
-	for _ = range x.state {
+	const fuse = 20
+	for i := 0; i < fuse; i++ {
 		s = a*s + c
 		s = a*s + c
 	}
-	for i := range x.state {
+	for i := range state {
 		s = a*s + c
-		x.state[i] ^= s >> 32
+		state[i] ^= s >> 32
 		s = a*s + c
-		x.state[i] ^= s & 0xffffffff00000000
+		state[i] ^= s & 0xffffffff00000000
+		sum ^= state[i]
 	}
-	// Calculate the sum once. Each new sum can be calculated with two XORs
-	// per value after this.
-	for _, v := range x.state {
-		x.sum ^= v
+	imcheating := &xer{sum, 0, state}
+	for _ = range state {
+		imcheating.Int63()
 	}
+	return imcheating.sum
+}
+
+func (x *xer) Seed(seed int64) {
+	x.sum = doSeed(uint64(seed), x.state)
 }
 
 func (x *xer) Int63() int64 {
