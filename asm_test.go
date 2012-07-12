@@ -25,10 +25,10 @@ package xer
 
 import "testing"
 
-func TestMyASMActuallyWorks(t *testing.T) {
+func TestMyASMActuallyWorks256(t *testing.T) {
 	xn := newN(0, 256)
 	x256 := new256(0)
-	t.Log("have popcnt:", havePopcnt())
+	// t.Log("have popcnt:", havePopcnt())
 	for i := 0; i < 1<<16; i++ {
 		if a, b := x256.Int63(), xn.Int63(); a != b {
 			t.Fatalf("mismatched generators (%d iters): got %d, expected %d\n", i, a, b)
@@ -43,6 +43,26 @@ func TestMyASMActuallyWorks(t *testing.T) {
 		}
 	}
 	int63_a256 = temp
+}
+
+func TestMyASMActuallyWorks65536(t *testing.T) {
+	xn := newN(0, 65536)
+	x65536 := new65536(0)
+	// t.Log("have popcnt:", havePopcnt())
+	for i := 0; i < 1<<16; i++ {
+		if a, b := x65536.Int63(), xn.Int63(); a != b {
+			t.Fatalf("mismatched generators (%d iters): got %d, expected %d\n", i, a, b)
+		}
+	}
+	t.Log("forcing no popcnt")
+	temp := int63_a65536
+	int63_a65536 = int63_basic65536
+	for i := 0; i < 1<<16; i++ {
+		if a, b := x65536.Int63(), xn.Int63(); a != b {
+			t.Fatalf("mismatched generators (%d iters): got %d, expected %d\n", i, a, b)
+		}
+	}
+	int63_a65536 = temp
 }
 
 func BenchmarkXer256ForceNoPopcnt(b *testing.B) {
