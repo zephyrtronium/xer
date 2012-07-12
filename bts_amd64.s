@@ -61,7 +61,7 @@ TEXT ·int63_basicany+0(SB), $16-16
 	//MOVQ	$0x7fffffffffffffff,BX
 	INCL	CX // CX = x.c + 1
 	CMPL	CX,24(BP) // if CX >= len(x.state) {
-	JHI	oobbasicany
+	JCC	oobbasicany
 	MOVL	CX,8(BP) // x.c = CX
 	JMP	donebasicany // } else {
 oobbasicany:
@@ -81,19 +81,20 @@ TEXT ·int63_popcntany+0(SB), $16-16
 	// F3 REX.W 0F B8 ModR/M
 	// REX.W = 0b01001000
 	// ModR/M = 0xcb = 0b11001011 = BX -> CX
-	BYTE	$0xf3;	BYTE	$0x48;	BYTE	$0x0f;	BYTE	$0xb8;	BYTE	$0xcb // CX = popcount(x.sum)
+	BYTE	$0xf3; BYTE $0x48; BYTE $0x0f; BYTE $0xb8; BYTE $0xcb // CX = popcount(x.sum)
 	MOVQ	BX,AX
 	RORQ	CX,AX // AX = ror(x.sum, popcount(x.sum))
 
 	XORQ	AX,BX // BX = x.sum ^ s
-	MOVB	8(BP),CX // CX = x.c
-	XORQ	16(BP)(CX*8),BX	// BX = x.sum ^ s ^ x.state[x.c]
-	MOVQ	AX,16(BP)(CX*8) // x.state[x.c] = s
+	MOVQ	16(BP),DX // DX = x.state
+	MOVL	8(BP),CX // CX = x.c
+	XORQ	(DX)(CX*8),BX // BX = x.sum ^ s ^ x.state[x.c]
+	MOVQ	AX,(DX)(CX*8) // x.state[x.c] = s
 	MOVQ	BX,(BP) // x.sum = x.sum ^ s ^ (old) x.state[x.c]
 	//MOVQ	$0x7fffffffffffffff,BX
 	INCL	CX // CX = x.c + 1
 	CMPL	CX,24(BP) // if CX >= len(x.state) {
-	JHI	oobpopany
+	JCC	oobpopany
 	MOVL	CX,8(BP) // x.c = CX
 	JMP	donepopany // } else {
 oobpopany:
