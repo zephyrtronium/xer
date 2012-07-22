@@ -14,7 +14,7 @@ import (
 var rng *rand.Rand
 
 func init() {
-	rng = xer.New(time.Now().UnixNano(), 256)
+	rng = rand.New(xer.New(time.Now().UnixNano(), 256))
 }
 ```
 
